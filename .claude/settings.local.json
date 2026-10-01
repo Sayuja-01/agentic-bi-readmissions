@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(python -m src.main)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe -m src.main)"
+    ]
+  }
+}
