@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HRRP Navigator — Case Study</title>
+<style>
+  .v3-root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --ink: #14171C;
+    --ink-muted: #6B7076;
+    --accent: #2F5FFF;
+    --accent-ink: #1A3BBF;
+    --accent-bg: #EAEFFF;
+    --warn: #C23B3B;
+    --warn-bg: #FBEAEA;
+    --good: #1F8A5A;
+    --good-bg: #E9F7F0;
+    --line: #E4E4DF;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .v3-root * { box-sizing: border-box; }
+  .v3-wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+
+  .v3-hero { padding: 72px 0 44px 0; }
+  .v3-kicker {
+    font-size: 12.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-ink);
+    margin-bottom: 16px;
+  }
+  .v3-title {
+    font-size: clamp(34px, 6vw, 52px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px 0;
+  }
+  .v3-title-accent {
+    background: linear-gradient(transparent 62%, var(--accent-bg) 62%);
+  }
+  .v3-tagline {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    margin: 0 0 22px 0;
+  }
+  .v3-subtitle {
+    font-size: 16px;
+    color: var(--ink-muted);
+    max-width: 600px;
+    margin: 0 0 26px 0;
+    line-height: 1.6;
+  }
+  .v3-stack { display: flex; flex-wrap: wrap; gap: 8px; }
+  .v3-chip {
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+
+  .v3-section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .v3-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--accent-ink);
+    margin-bottom: 10px;
+  }
+  .v3-h2 {
+    font-size: clamp(22px, 3.5vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px 0;
+  }
+  .v3-p { font-size: 15.5px; line-height: 1.65; margin: 0 0 14px 0; }
+  .v3-p-muted { color: var(--ink-muted); }
+
+  .v3-stat-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 24px 0; }
+  .v3-stat {
+    flex: 1;
+    min-width: 140px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    border-top: 3px solid var(--accent);
+  }
+  .v3-stat-num { font-size: 36px; font-weight: 800; color: var(--accent-ink); line-height: 1; margin-bottom: 6px; }
+  .v3-stat-label { font-size: 13px; color: var(--ink-muted); }
+
+  .v3-pipe { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
+  .v3-pipe-node {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 13.5px;
+    font-weight: 700;
+    flex: 1;
+    min-width: 108px;
+    text-align: center;
+  }
+  .v3-pipe-arrow { display: flex; align-items: center; color: var(--ink-muted); font-weight: 700; }
+  @media (max-width: 680px) { .v3-pipe { flex-direction: column; } .v3-pipe-arrow { transform: rotate(90deg); align-self: center; } }
+
+  .v3-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 22px 0; }
+  @media (max-width: 680px) { .v3-compare { grid-template-columns: 1fr; } }
+  .v3-compare-card { border-radius: 10px; padding: 18px; border: 1px solid var(--line); }
+  .v3-compare-card.bad { background: var(--warn-bg); border-color: #EBC9C9; }
+  .v3-compare-card.good { background: var(--good-bg); border-color: #C3E3D2; }
+  .v3-compare-tag { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .v3-compare-card.bad .v3-compare-tag { color: var(--warn); }
+  .v3-compare-card.good .v3-compare-tag { color: var(--good); }
+  .v3-compare-quote { font-size: 15px; font-style: italic; color: var(--ink); }
+
+  .v3-finding { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .v3-finding:last-child { border-bottom: none; }
+  .v3-finding-mark { color: var(--accent); font-weight: 800; flex-shrink: 0; }
+  .v3-finding-text { font-size: 15px; }
+
+  .v3-memo { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 26px; }
+  .v3-memo h4 { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-ink); margin: 18px 0 8px 0; }
+  .v3-memo h4:first-child { margin-top: 0; }
+  .v3-memo p { font-size: 14.5px; margin: 0; }
+
+  .v3-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  .v3-table th { text-align: left; padding: 10px 12px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-ink); border-bottom: 2px solid var(--ink); }
+  .v3-table td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+  .v3-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .v3-btn { display: inline-block; font-size: 15px; font-weight: 700; padding: 13px 24px; border-radius: 8px; text-decoration: none; transition: all 0.15s ease; }
+  .v3-btn.primary { background: var(--accent); color: white; }
+  .v3-btn.primary:hover { background: var(--accent-ink); }
+  .v3-btn.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .v3-btn.secondary:hover { border-color: var(--ink); }
+
+  .v3-footer { padding: 36px 0 60px 0; color: var(--ink-muted); font-size: 13px; text-align: center; }
+
+</style>
+
+</head>
+<body>
+<div class="v3-root">
+  <div class="v3-wrap">
+
+    <div class="v3-hero">
+      <div class="v3-kicker">Agentic BI Case Study</div>
+      <h1 class="v3-title"><span class="v3-title-accent">HRRP Navigator</span></h1>
+      <p class="v3-tagline">An autonomous analyst agent for hospital readmission risk</p>
+      <p class="v3-subtitle">HRRP Navigator investigates CMS hospital readmission penalty data the way a human analyst would: breaking a business question into sub-questions, writing and self-correcting its own SQL, and producing a strategist's recommendation, with every reasoning step logged for review.</p>
+      <div class="v3-stack">
+        <span class="v3-chip">Python</span>
+        <span class="v3-chip">LangGraph</span>
+        <span class="v3-chip">Claude API</span>
+        <span class="v3-chip">SQLite</span>
+      </div>
+    </div>
+
+    <div class="v3-section">
+      <div class="v3-eyebrow">The problem</div>
+      <h2 class="v3-h2">A penalty most hospitals already carry</h2>
+      <p class="v3-p">CMS penalizes hospitals up to 3% of Medicare reimbursement for excess 30-day readmissions. Across this dataset, exposure is less a tail risk and more a baseline condition most health systems are managing right now.</p>
+      <div class="v3-stat-row">
+        <div class="v3-stat"><div class="v3-stat-num">83%</div><div class="v3-stat-label">of eligible hospitals face an active penalty</div></div>
+        <div class="v3-stat"><div class="v3-stat-num">2,833</div><div class="v3-stat-label">hospitals in the dataset</div></div>
+        <div class="v3-stat"><div class="v3-stat-num">77</div><div class="v3-stat-label">sit at the maximum penalty tier</div></div>
+      </div>
+      <p class="v3-p v3-p-muted">The question HRRP Navigator answers: which hospitals are most exposed, what's actually driving it, and what should a health system do about it.</p>
+    </div>
+
+    <div class="v3-section">
+      <div class="v3-eyebrow">How it thinks</div>
+      <h2 class="v3-h2">Five stages, each self-correcting</h2>
+      <p class="v3-p">If a generated SQL query errors, the message gets fed back to Claude to fix, with up to two retries, before the system reports honestly rather than pushing bad data forward.</p>
+      <div class="v3-pipe">
+        <div class="v3-pipe-node">Planner</div>
+        <div class="v3-pipe-arrow">→</div>
+        <div class="v3-pipe-node">SQL Writer</div>
+        <div class="v3-pipe-arrow">→</div>
+        <div class="v3-pipe-node">Executor</div>
+        <div class="v3-pipe-arrow">→</div>
+        <div class="v3-pipe-node">Synthesizer</div>
+        <div class="v3-pipe-arrow">→</div>
+        <div class="v3-pipe-node">Strategist</div>
+      </div>
+    </div>
+
+    <div class="v3-section">
+      <div class="v3-eyebrow">What it found</div>
+      <h2 class="v3-h2">Key findings</h2>
+      <div class="v3-finding"><span class="v3-finding-mark">•</span><span class="v3-finding-text"><strong>2.8% of hospitals</strong> carry the heaviest penalty burden, while 1,339 sit safely below risk; exposure is concentrated, not evenly spread.</span></div>
+      <div class="v3-finding"><span class="v3-finding-mark">•</span><span class="v3-finding-text">Star rating is a clean, consistent signal: <strong>excess readmission ratio drops steadily from 1.048 to 0.966</strong> as rating improves.</span></div>
+      <div class="v3-finding"><span class="v3-finding-mark">•</span><span class="v3-finding-text"><strong>Single-specialty surgical hospitals rank worst</strong>, but only because they're measured on one condition; specialty status itself isn't the problem.</span></div>
+      <div class="v3-finding"><span class="v3-finding-mark">•</span><span class="v3-finding-text">Ownership type explains little variance (0.953–1.017), not the lever it first appears to be.</span></div>
+      <div class="v3-finding"><span class="v3-finding-mark">•</span><span class="v3-finding-text"><strong>Colorado and Oklahoma</strong> show the highest average excess ratios, and are worth a dedicated regional review.</span></div>
+    </div>
+
+    <div class="v3-section">
+      <div class="v3-eyebrow">See it yourself</div>
+      <div class="v3-cta-row">
+        <a class="v3-btn primary" href="./demo.html" target="_blank">Try the live demo</a>
+        <a class="v3-btn secondary" href="https://github.com/Sayuja-01/agentic-bi-readmissions" target="_blank">View the code on GitHub</a>
+      </div>
+    </div>
+
+    <div class="v3-footer">Sayuja Kute · HRRP Navigator</div>
+
+  </div>
+</div>
+
+</body>
+</html>

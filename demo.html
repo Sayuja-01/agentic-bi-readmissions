@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HRRP Navigator — Demo Replay</title>
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --border: #E4E4DF;
+    --text: #14171C;
+    --text-muted: #6B7076;
+    --accent: #2F5FFF;
+    --accent-dark: #1A3BBF;
+    --accent-bg: #EAEFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 36px 20px 64px 20px; }
+
+  .header { margin-bottom: 22px; }
+  .kicker { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--accent-dark); margin-bottom: 10px; }
+  .title { font-size: clamp(26px, 5vw, 36px); font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-muted); font-size: 15px; max-width: 620px; margin: 0; }
+  .note { font-size: 13px; color: var(--text-muted); margin-top: 14px; background: var(--accent-bg); border-radius: 8px; padding: 10px 14px; display: inline-block; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .section-title { font-size: 15px; font-weight: 700; margin: 0 0 12px 0; }
+
+  .q-box {
+    background: var(--accent-bg);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .run-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 7px;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .run-btn:disabled { background: #AEB8C4; cursor: default; }
+  .run-btn:hover:not(:disabled) { background: var(--accent-dark); }
+
+  .stages { display: flex; align-items: center; margin: 20px 0 4px 0; }
+  .stage { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+  .stage-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--text-muted); z-index: 1;
+  }
+  .stage-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .stage-line { position: absolute; top: 10px; left: 50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+  .stage:last-child .stage-line { display: none; }
+  .stage.done .stage-dot { background: var(--accent); border-color: var(--accent); color: white; }
+  .stage.done .stage-line { background: var(--accent); }
+
+  .subq-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; opacity: 0; transform: translateY(6px); transition: opacity 0.4s ease, transform 0.4s ease; }
+  .subq-card.show { opacity: 1; transform: translateY(0); }
+  .subq-cat { display: inline-block; font-size: 10.5px; text-transform: lowercase; background: var(--accent-bg); color: var(--accent-dark); padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; }
+  .subq-q { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .subq-a { font-size: 13.5px; color: var(--text-muted); }
+
+  .sql-sample {
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 12px; background: #14171C; color: #D9E2E8;
+    padding: 10px 12px; border-radius: 5px; white-space: pre-wrap; margin-top: 8px;
+  }
+
+  .finding-card { border-left: 3px solid var(--accent); background: var(--accent-bg); padding: 10px 12px; border-radius: 0 6px 6px 0; margin-bottom: 10px; opacity: 0; transform: translateY(6px); transition: opacity 0.4s ease, transform 0.4s ease; }
+  .finding-card.show { opacity: 1; transform: translateY(0); }
+  .finding-text { font-size: 13.5px; font-weight: 600; }
+
+  .memo { opacity: 0; transition: opacity 0.5s ease; }
+  .memo.show { opacity: 1; }
+  .memo h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: 16px 0 6px 0; }
+  .memo h4:first-child { margin-top: 0; }
+  .memo p { font-size: 14.5px; margin: 0; }
+
+  .empty-note { color: var(--text-muted); font-size: 13px; font-style: italic; }
+
+  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13.5px; color: var(--accent-dark); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back-link" href="./index.html">← Back to case study</a>
+
+  <div class="header">
+    <div class="kicker">HRRP Navigator</div>
+    <h1 class="title">See a real investigation, step by step</h1>
+    <p class="subtitle">This replays an actual completed run of the agent against the real CMS dataset: the same sub-questions, findings, and memo it produced, shown here as a recorded walkthrough rather than a live call.</p>
+    <div class="note">This is a recorded replay of a real run, not a live AI call, kept this way so the demo stays free to host and run.</div>
+  </div>
+
+  <div class="panel">
+    <p class="section-title">Seed business question</p>
+    <div class="q-box">Which hospitals are most exposed to readmission penalties, and what's driving it?</div>
+    <button class="run-btn" id="runBtn">Replay investigation</button>
+
+    <div class="stages" id="stages">
+      <div class="stage" data-stage="plan"><div class="stage-line"></div><div class="stage-dot">1</div><div class="stage-label">Plan</div></div>
+      <div class="stage" data-stage="query"><div class="stage-line"></div><div class="stage-dot">2</div><div class="stage-label">Query</div></div>
+      <div class="stage" data-stage="synthesize"><div class="stage-line"></div><div class="stage-dot">3</div><div class="stage-label">Synthesize</div></div>
+      <div class="stage" data-stage="memo"><div class="stage-line"></div><div class="stage-dot">4</div><div class="stage-label">Draft memo</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="section-title">Sub-questions it planned</p>
+    <div id="subqContainer"><p class="empty-note">Click "Replay investigation" above to step through it.</p></div>
+  </div>
+
+  <div class="panel">
+    <p class="section-title">Findings</p>
+    <div id="findingsContainer"><p class="empty-note">Ranked findings will appear here.</p></div>
+  </div>
+
+  <div class="panel">
+    <p class="section-title">Strategist memo</p>
+    <div id="memoContainer" class="memo">
+      <p class="empty-note">The executive memo will appear here once the replay completes.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const subquestions = [
+    {
+      category: "scope",
+      question: "What is the total number of hospitals subject to HRRP penalties, and how is penalty severity distributed across the full population?",
+      answer: "83% of eligible hospitals (2,358 of 2,833) are penalized; 765 of those fall into the severe tier.",
+      sql: "SELECT COUNT(DISTINCT CASE WHEN excess_readmission_ratio > 1.0 THEN facility_id END) AS penalized,\n       COUNT(DISTINCT CASE WHEN excess_readmission_ratio > 1.10 THEN facility_id END) AS severe\nFROM readmission_measures\nWHERE excess_readmission_ratio IS NOT NULL;"
+    },
+    {
+      category: "ranking",
+      question: "Which hospitals carry the highest penalty burden, and how concentrated is that exposure among the most severe cases?",
+      answer: "77 hospitals (2.8%) sit at the maximum penalty tier, while 1,339 sit safely below risk. Exposure is concentrated, not evenly spread."
+    },
+    {
+      category: "correlates",
+      question: "Is there a relationship between hospital star rating, ownership type, and excess readmission ratio?",
+      answer: "Star rating shows a clean, consistent gradient: ERR falls from 1.048 at 1-star to 0.966 at 5-star. Ownership type explains far less (0.953 to 1.017 range)."
+    },
+    {
+      category: "contrast",
+      question: "Which hospital types or regions show surprising exceptions to the general pattern?",
+      answer: "Single-specialty surgical hospitals rank worst overall, but only because they're measured on one condition. Colorado and Oklahoma show the highest average excess ratios regionally."
+    }
+  ];
+
+  const findings = [
+    "2.8% of hospitals (77) carry the heaviest penalty burden, while 1,339 sit safely below risk. Exposure is concentrated, not evenly spread.",
+    "Star rating is a clean, consistent signal: excess readmission ratio drops steadily from 1.048 to 0.966 as rating improves.",
+    "Single-specialty surgical hospitals rank worst, but only because they're measured on one condition; specialty status itself isn't the problem.",
+    "Ownership type explains little variance (0.953 to 1.017), not the lever it first appears to be.",
+    "Colorado and Oklahoma show the highest average excess ratios, worth a dedicated regional review."
+  ];
+
+  const memo = {
+    situation: "HRRP penalty exposure concentrates in a tail of 77 hospitals (2.8%) at the maximum penalty tier, while 1,339 hospitals sit safely below risk.",
+    recommendation: "Prioritize the 77 max-tier hospitals, especially low-volume single-condition surgical facilities, use star rating as a cheap triage signal, and launch a regional care-coordination review in Colorado and Oklahoma."
+  };
+
+  const runBtn = document.getElementById('runBtn');
+  const subqContainer = document.getElementById('subqContainer');
+  const findingsContainer = document.getElementById('findingsContainer');
+  const memoContainer = document.getElementById('memoContainer');
+
+  function setStage(name) {
+    const order = ['plan', 'query', 'synthesize', 'memo'];
+    const idx = order.indexOf(name);
+    document.querySelectorAll('.stage').forEach(el => {
+      if (order.indexOf(el.dataset.stage) <= idx) el.classList.add('done');
+    });
+  }
+
+  function delay(ms) { return new Promise(res => setTimeout(res, ms)); }
+
+  async function replay() {
+    runBtn.disabled = true;
+    subqContainer.innerHTML = '';
+    findingsContainer.innerHTML = '';
+    memoContainer.innerHTML = '';
+    memoContainer.classList.remove('show');
+    document.querySelectorAll('.stage').forEach(el => el.classList.remove('done'));
+
+    setStage('plan');
+    await delay(500);
+
+    for (const sq of subquestions) {
+      const card = document.createElement('div');
+      card.className = 'subq-card';
+      let html = '<span class="subq-cat">' + sq.category + '</span><div class="subq-q">' + sq.question + '</div><div class="subq-a">' + sq.answer + '</div>';
+      if (sq.sql) html += '<div class="sql-sample">' + sq.sql + '</div>';
+      card.innerHTML = html;
+      subqContainer.appendChild(card);
+      await delay(50);
+      card.classList.add('show');
+      await delay(550);
+    }
+    setStage('query');
+    await delay(400);
+
+    setStage('synthesize');
+    for (const f of findings) {
+      const card = document.createElement('div');
+      card.className = 'finding-card';
+      card.innerHTML = '<span class="finding-text">' + f + '</span>';
+      findingsContainer.appendChild(card);
+      await delay(50);
+      card.classList.add('show');
+      await delay(350);
+    }
+    await delay(300);
+
+    setStage('memo');
+    memoContainer.innerHTML =
+      '<h4>Situation</h4><p>' + memo.situation + '</p>' +
+      '<h4>Recommendation</h4><p>' + memo.recommendation + '</p>';
+    memoContainer.classList.add('show');
+
+    runBtn.disabled = false;
+  }
+
+  runBtn.addEventListener('click', replay);
+})();
+</script>
+</body>
+</html>
